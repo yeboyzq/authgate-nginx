@@ -1,0 +1,73 @@
+# go install github.com/air-verse/air@latest
+# 工作区间
+# .(当前目录)或绝对路径, 注意这些目录都在根目录下面.
+root = "."
+# 临时目录
+tmp_dir = "tmp"
+
+[build]
+# 只是普通的shell命令, 可以使用make
+cmd = "go build -v -o ./tmp/main.exe ./app"
+# cmd配置命令输出的二进制文件的位置
+bin = "tmp/main.exe"
+# 自定义二进制文件, 可以在运行应用程序时设置环境变量
+#full_bin = "APP_ENV=dev APP_USER=air ./tmp/main"
+# 监听的文件扩展后缀列表
+include_ext = ["go", "tpl", "tmpl", "html", "json", "yaml"]
+# 忽略这些文件扩展名或目录
+exclude_dir = ["vendor", "tmp", "log", "conf.d"]
+# 如果指定, 则只监听包含这些文件目录
+include_dir = []
+# 监听文件列表.
+include_file = []
+# 忽略文件列表
+exclude_file = []
+# 排除特定的正则表达式
+exclude_regex = ["_test\\.go"]
+# 排除未更改的文件
+exclude_unchanged = true
+# 遵循目录的符号链接
+follow_symlink = true
+# 日志文件名称, 位于tmp_dir中
+log = "air.log"
+# 轮询文件以了解更改, 而不是使用fsnotify
+poll = false
+# 轮询间隔(默认最小间隔为500ms)
+poll_interval = 10000
+# 延时构建, 如果文件更改太频繁，则不必每次都触发构建
+delay = 30000
+# 当发生构建错误时停止运行旧的二进制文件
+stop_on_error = true
+# 在杀死进程之前发送中断信号
+send_interrupt = true
+# 发送中断信号后的延迟
+kill_delay = 1000
+# 是否重新运行二进制文件
+rerun = false
+# 每次执行后的延迟
+rerun_delay = 500
+# 运行二进制文件时添加附加参数
+args_bin = ["start"]
+
+[log]
+# 日志是否显示时间
+time = false
+# 只显示主日志
+main_only = false
+
+[color]
+# 自定义每类输出的颜色, 如果找不到这个颜色, 使用原本的日志输出演示
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+# 退出时是否删除临时目录
+clean_on_exit = true
+
+[screen]
+# 重建时清除屏幕
+clear_on_rebuild = false
+# 滚动屏幕
+keep_scroll = true

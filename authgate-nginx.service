@@ -1,0 +1,20 @@
+[Unit]
+Description=AuthGate-Nginx Server
+After=syslog.target
+After=network.target
+
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/data/soft/authgate-nginx/bin/authgate-nginx start --config /data/soft/authgate-nginx/conf.d/config.yaml
+WorkingDirectory=/data/soft/authgate-nginx
+Restart=always
+RestartSec=30s
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+
+
+[Install]
+WantedBy=multi-user.target

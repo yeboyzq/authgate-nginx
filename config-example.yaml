@@ -1,0 +1,65 @@
+# 该文件列出了应用使用的默认值.
+# 将所需部分复制到config.yaml(默认为conf.d/config.yaml)
+# 并根据需要进行修改, 不要按原样复制整个文件.
+
+# 基础配置
+base:
+  # 运行模式
+  debug: false
+  # 站点名称
+  siteName: 认证网关
+  # 版权信息
+  copyright: 
+  # 服务器配置
+  server:
+    # 应用协议
+    protocol: http
+    # 访问域名
+    domain: 127.0.0.1
+    # 配置应用端口
+    port: 8000
+  # token配置
+  jwt:
+    # 设置加密密钥
+    secret: xxxx
+    # 设置token过期时间(小时)
+    expiry: 8
+    # 设置token存放名称(含Header/Cookie)
+    storageName: NginxAuthToken
+  # 缓存配置
+  cache:
+    # 设置缓存大小(MB)
+    maxsize: 128
+  # ldap配置
+  ldap:
+    # 设置服务器连接
+    url: ldap://localhost:389
+    # 设置是否跳过实例证书认证
+    skipVerify: false
+    # 设置绑定基础用户
+    bindDn: cn=admin,dc=example,dc=com
+    # 设置绑定基础用户密码
+    bindPassword: admin_password
+    # 设置绑定基础OU
+    userBaseDn: ou=users,dc=example,dc=com
+    # 设置用户过滤
+    filter: (uid=%s)
+  log:
+    # 设置日志保存路径
+    path: ./logs
+    # 设置日志保存文件大小(M)
+    maxsize:
+    # 设置日志保留天数
+    maxage:
+    # 设置日志保留文件个数
+    maxbackups:
+    # 设置日志压缩
+    compress: 
+    # 设置日志等级
+    level: "info"
+
+# 高级设置
+advanced:
+  # 设置白名单
+  whitelist: 
+    - /xxxxxxxx*

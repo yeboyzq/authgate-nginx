@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>{{.SiteName}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/nginx/favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e5799 0%, #207cca 51%, #2989d8 100%);
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 900px;
+            height: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin: auto;
+        }
+
+        .login-section {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand {
+            margin-bottom: 40px;
+        }
+
+        .brand h1 {
+            color: #1e5799;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .brand p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e5799;
+            box-shadow: 0 0 0 3px rgba(30, 87, 153, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(30, 87, 153, 0.2);
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 87, 153, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fdf2f2;
+            border-radius: 5px;
+            border-left: 4px solid #e74c3c;
+            display: none;
+            font-size: 14px;
+        }
+
+        .graphic-section {
+            flex: 1;
+            background: linear-gradient(to bottom right, #1e5799, #2989d8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graphic-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .graphic-content h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .graphic-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .circle-1 {
+            width: 150px;
+            height: 150px;
+            top: 10%;
+            left: 20%;
+        }
+
+        .circle-2 {
+            width: 100px;
+            height: 100px;
+            bottom: 15%;
+            right: 20%;
+        }
+
+        .circle-3 {
+            width: 70px;
+            height: 70px;
+            top: 60%;
+            left: 10%;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 20px 0;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+            }
+
+            .graphic-section {
+                padding: 30px 20px;
+            }
+
+            .login-section {
+                padding: 40px 30px;
+            }
+
+            .footer {
+                padding: 15px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-section">
+            <div class="brand">
+                <h1>{{.SiteName}}</h1>
+                <p>请登录认证网关后访问受保护系统</p>
+            </div>
+
+            <form id="loginForm" class="login-form" method="POST" action="/auth/api/login">
+                <input type="hidden" name="redirect" value="{{.RedirectURL}}">
+
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入您的用户名" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请输入您的密码" required>
+                    <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                </div>
+
+                <button type="submit" class="login-btn">登录</button>
+
+                <div id="errorMessage" class="error" style="display: none;"></div>
+            </form>
+        </div>
+
+        <div class="graphic-section">
+            <div class="floating-elements">
+                <div class="circle circle-1"></div>
+                <div class="circle circle-2"></div>
+                <div class="circle circle-3"></div>
+            </div>
+
+            <div class="graphic-content">
+                <h2>AuthGate</h2>
+                <p>Guard the Data Gateway.</p>
+                <p>Define the Security Perimeter.</p>
+                <p>守护数据入口，定义安全边界。</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        {{.Copyright}}
+    </div>
+
+    <script>
+        // 设置redirect值 - 优先从隐藏字段获取，其次从URL参数获取，最后使用默认值
+        const redirectInput = document.querySelector('input[name="redirect"]');
+        let redirect = redirectInput.value;
+
+        if (!redirect) {
+            const urlParams = new URLSearchParams(window.location.search);
+            redirect = urlParams.get('redirect') || '/';
+            // 将获取到的值设置回隐藏字段
+            redirectInput.value = redirect;
+        }
+
+        // 密码显示/隐藏功能
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.password-toggle');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '🔒';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️';
+            }
+        }
+
+        // 表单提交处理
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData(e.target);
+            // 从隐藏字段获取redirect值
+            const redirectValue = document.querySelector('input[name="redirect"]').value
+
+            try {
+                const response = await fetch(`/nginx/api/login?redirect=${encodeURIComponent(redirectValue)}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.code === 200) {
+                        // 登录成功，重定向
+                        window.location.href = data.data.redirect;
+                    } else {
+                        errorMessage.textContent = data.error || '登录失败';
+                        errorMessage.style.display = 'block';
+                    }
+                } else {
+                    const error = await response.json();
+                    errorMessage.textContent = error.error || '登录失败';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = '网络错误，请稍后重试';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>
