@@ -70,7 +70,7 @@ func StartMain() {
 
 	// 配置模板渲染器
 	app.Renderer = &templates.Template{
-		Templates: template.Must(template.ParseGlob("app/templates/*.html")),
+		Templates: template.Must(template.ParseFS(templates.TemplateFS, "*.html")),
 	}
 
 	// 启动服务

@@ -13,11 +13,15 @@ See the Mulan PSL v2 for more details.
 package templates
 
 import (
+	"embed"
 	"html/template"
 	"io"
 
 	"github.com/labstack/echo/v5"
 )
+
+//go:embed *.html
+var TemplateFS embed.FS
 
 type Template struct {
 	Templates *template.Template

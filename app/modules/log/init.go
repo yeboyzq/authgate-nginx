@@ -83,17 +83,16 @@ func Init(e *echo.Echo) echo.MiddlewareFunc {
 		Compress:   Conf.Compress,
 	}
 
-	// 创建多输出：文件 + 控制台
-	multiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
-
 	// 创建 slog handler
 	var handler slog.Handler
 	if Conf.Debug {
+		multiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
 		handler = slog.NewTextHandler(multiWriter, &slog.HandlerOptions{
 			AddSource: addSource,
 			Level:     level,
 		})
 	} else {
+		multiWriter := io.MultiWriter(lumberjackLogger)
 		handler = slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
 			AddSource: addSource,
 			Level:     level,
