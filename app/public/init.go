@@ -10,34 +10,22 @@ MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 See the Mulan PSL v2 for more details.
 */
 
-package templates
+package public
 
 import (
 	"embed"
-	"html/template"
-	"io"
 
 	"github.com/labstack/echo/v5"
 	"github.com/yeboyzq/authgate-nginx/app/modules/log"
 )
 
-//go:embed *.tmpl
-var TemplateFS embed.FS
+//go:embed static/*
+var StaticFS embed.FS
 
-type Template struct {
-	Templates *template.Template
-}
-
-// 模板初始化
+// 静态资源初始化
 func Init(e *echo.Echo) {
-	e.Renderer = &Template{
-		Templates: template.Must(template.ParseFS(TemplateFS, "*.tmpl")),
-	}
+	e.StaticFS("/nginx", StaticFS)
+	e.FileFS("/nginx/favicon.ico", "static/favicon.ico", StaticFS)
 
-	log.Info("应用模板初始化完成.")
-}
-
-// 模板操作
-func (s *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return s.Templates.ExecuteTemplate(w, name, data)
+	log.Info("应用静态资源初始化完成.")
 }

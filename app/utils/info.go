@@ -36,7 +36,7 @@ type AppVersionInfo struct {
 var VersionInfo = &AppVersionInfo{
 	AppVersion:      "1.0.0",
 	DatabaseVersion: 0,
-	BuildTime:       timeFormat("2025-11-01"),
+	BuildTime:       timeFormat("2025-11-04"),
 	BuiltBy:         runtime.Version(),
 }
 

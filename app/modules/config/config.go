@@ -57,7 +57,7 @@ func readConfig() *viper.Viper {
 	// 读取文件错误处理
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			slog.Warn("配置初始化异常: 配置文件没有找到, 将以默认配置启动.")
+			slog.Debug("配置初始化提示: 配置文件没有找到, 将以默认配置启动.")
 		} else {
 			slog.Error("配置初始化失败: " + err.Error())
 		}

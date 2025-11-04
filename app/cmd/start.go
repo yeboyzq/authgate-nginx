@@ -13,7 +13,6 @@ See the Mulan PSL v2 for more details.
 package cmd
 
 import (
-	"html/template"
 	"net/http"
 	"time"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/yeboyzq/authgate-nginx/app/modules"
 	"github.com/yeboyzq/authgate-nginx/app/modules/config"
 	"github.com/yeboyzq/authgate-nginx/app/modules/log"
+	"github.com/yeboyzq/authgate-nginx/app/public"
 	"github.com/yeboyzq/authgate-nginx/app/routers"
 	"github.com/yeboyzq/authgate-nginx/app/templates"
 	"github.com/yeboyzq/authgate-nginx/app/utils"
@@ -63,15 +63,10 @@ func StartMain() {
 
 	// 加载路由
 	routers.Init(app)
-
 	// 加载静态文件目录
-	app.File("/nginx/favicon.ico", "app/static/favicon.ico")
-	app.Static("/static", "static")
-
-	// 配置模板渲染器
-	app.Renderer = &templates.Template{
-		Templates: template.Must(template.ParseFS(templates.TemplateFS, "*.html")),
-	}
+	public.Init(app)
+	// 加载模板
+	templates.Init(app)
 
 	// 启动服务
 	log.Info("初始化完成, 启动中...")

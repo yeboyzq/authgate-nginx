@@ -53,7 +53,7 @@ func LoginPageHandler(c echo.Context) error {
 	}
 
 	// 渲染登录页面
-	return c.Render(http.StatusOK, "login.html", map[string]interface{}{
+	return c.Render(http.StatusOK, "login.tmpl", map[string]interface{}{
 		"SiteName":    config.GetSiteName(),
 		"Copyright":   template.HTML(config.GetCopyright()),
 		"RedirectURL": redirectURL,
