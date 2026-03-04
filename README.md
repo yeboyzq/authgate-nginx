@@ -38,7 +38,9 @@ AuthGate-Nginx 是一个基于 Go 语言构建的轻量级、高性能身份验�
     ```bash
     git clone https://github.com/yeboyzq/authgate-nginx.git
     cd authgate-nginx
-    go build -o ./build/authgate-nginx ./app
+    env GOOS=linux GOARCH=amd64 go build -o ./build/authgate-nginx ./app
+    # 或
+    env GOOS=windows GOARCH=amd64 go build -o ./build/authgate-nginx.exe ./app
     ```
 
 3. **使用 Docker**

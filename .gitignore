@@ -34,5 +34,6 @@ go.work.sum
 
 # other
 tmp/
+build/
 logs/
 conf.d/
