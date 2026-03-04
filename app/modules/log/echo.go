@@ -13,29 +13,13 @@ See the Mulan PSL v2 for more details.
 package log
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
 )
 
-// EchoLoggerAdapter 包装slog.Logger以实现Echo的Logger接口
-type EchoLoggerAdapter struct {
-	Logger *slog.Logger
-}
-
-// Write 实现 io.Writer 接口
-func (s *EchoLoggerAdapter) Write(p []byte) (n int, err error) {
-	s.Logger.Info(string(p))
-	return len(p), nil
-}
-
-func (s *EchoLoggerAdapter) Error(err error) {
-	s.Logger.Error(err.Error())
-}
-
 // CustomErrorHandler 自定义错误处理
-func CustomErrorHandler(c echo.Context, err error) {
+func CustomErrorHandler(c *echo.Context, err error) {
 	switch e := err.(type) {
 	case *echo.HTTPError:
 		Warn(e.Error())

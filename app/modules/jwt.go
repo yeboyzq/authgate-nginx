@@ -106,7 +106,7 @@ func (s *JwtAuth) RefreshToken(tokenString string) (string, *Claims, error) {
 }
 
 // ExtractToken 提取token
-func (s *JwtAuth) ExtractToken(c echo.Context) string {
+func (s *JwtAuth) ExtractToken(c *echo.Context) string {
 	// 从Authorization header提取
 	authHeader := c.Request().Header.Get(s.storageName)
 	if strings.HasPrefix(authHeader, "Bearer ") {

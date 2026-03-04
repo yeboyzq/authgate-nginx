@@ -35,7 +35,7 @@ const (
 var UserAgentHeader = fmt.Sprintf("go-%s/%s", AppFileName(), VersionInfo.AppVersion)
 
 // GetEchoContext 通过echo.Echo获取echo.Context, 禁止传递到异步任务中使用
-func GetEchoContext(e *echo.Echo, method string, path string, body any) (c echo.Context) {
+func GetEchoContext(e *echo.Echo, method string, path string, body any) (c *echo.Context) {
 	// 创建新的Echo上下文并设置请求上下文
 	var req *http.Request
 	if body != nil {
@@ -52,7 +52,7 @@ func GetEchoContext(e *echo.Echo, method string, path string, body any) (c echo.
 }
 
 // CopyEchoContext 通过echo.Context复制获取echo.Context, 主要用于异步任务中使用
-func CopyEchoContext(c echo.Context) (ctx echo.Context) {
+func CopyEchoContext(c *echo.Context) (ctx *echo.Context) {
 	if c == nil || c.Echo() == nil {
 		panic("CopyEchoContext: echo.Context对象不能为空")
 	}
@@ -62,7 +62,7 @@ func CopyEchoContext(c echo.Context) (ctx echo.Context) {
 	// 创建请求的浅拷贝, 避免修改原始请求
 	copiedReq := originalReq.Clone(originalReq.Context())
 	// 创建新的上下文, 使用复制的请求
-	ctx = c.Echo().NewContext(copiedReq, c.Response().Writer)
+	ctx = c.Echo().NewContext(copiedReq, c.Response())
 
 	// 复制RequestID
 	if requestID := GetRequestID(c); requestID != "" {
@@ -81,7 +81,7 @@ func CopyEchoContext(c echo.Context) (ctx echo.Context) {
 }
 
 // GetContext 通过echo.Context获取context.Context
-func GetContext(c echo.Context) (ctx context.Context) {
+func GetContext(c *echo.Context) (ctx context.Context) {
 	if c == nil {
 		return context.Background()
 	}
@@ -95,7 +95,7 @@ func GetContext(c echo.Context) (ctx context.Context) {
 }
 
 // GetRequestID 获取请求ID
-func GetRequestID(c echo.Context) string {
+func GetRequestID(c *echo.Context) string {
 	requestID := c.Request().Header.Get(echo.HeaderXRequestID)
 	if requestID == "" {
 		requestID = c.Response().Header().Get(echo.HeaderXRequestID)

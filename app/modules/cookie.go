@@ -35,7 +35,7 @@ func getCookieName() string {
 	return config.Cfg.GetString("base.jwt.storageName")
 }
 
-func getCookieDomain(c echo.Context) string {
+func getCookieDomain(c *echo.Context) string {
 	host := c.Request().Host
 	_, err := net.LookupHost(host)
 	if err != nil {
@@ -49,7 +49,7 @@ func getCookieMaxAge() int {
 	return expiry
 }
 
-func getCookieConfig(c echo.Context) CookieConfig {
+func getCookieConfig(c *echo.Context) CookieConfig {
 	// 根据请求判断是否使用Secure Cookie
 	isSecure := c.Scheme() == "https"
 
@@ -65,7 +65,7 @@ func getCookieConfig(c echo.Context) CookieConfig {
 }
 
 // SetAuthCookie 设置Cookie
-func SetAuthCookie(c echo.Context, token string, expires time.Time) {
+func SetAuthCookie(c *echo.Context, token string, expires time.Time) {
 	cookieConfig := getCookieConfig(c)
 
 	cookie := new(http.Cookie)
@@ -83,7 +83,7 @@ func SetAuthCookie(c echo.Context, token string, expires time.Time) {
 }
 
 // ClearAuthCookie 清除Cookie
-func ClearAuthCookie(c echo.Context) {
+func ClearAuthCookie(c *echo.Context) {
 	cookieConfig := getCookieConfig(c)
 
 	cookie := new(http.Cookie)

@@ -38,6 +38,6 @@ func Init(e *echo.Echo) {
 }
 
 // 模板操作
-func (s *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (s *Template) Render(c *echo.Context, w io.Writer, name string, data interface{}) error {
 	return s.Templates.ExecuteTemplate(w, name, data)
 }

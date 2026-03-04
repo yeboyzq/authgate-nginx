@@ -37,7 +37,7 @@ type ResponseLoginInfo struct {
 }
 
 // LoginPageHandler 显示登录页面
-func LoginPageHandler(c echo.Context) error {
+func LoginPageHandler(c *echo.Context) error {
 	// 如果已经登录，重定向到原始页面或首页
 	tokenString := modules.Jwt.ExtractToken(c)
 	redirectURL := c.QueryParam("redirect")
@@ -61,7 +61,7 @@ func LoginPageHandler(c echo.Context) error {
 }
 
 // LoginHandler 处理LDAP认证并生成Token
-func LoginHandler(c echo.Context) error {
+func LoginHandler(c *echo.Context) error {
 	var req RequestUserInfo
 	redirectURL := c.QueryParam("redirect")
 	if err := c.Bind(&req); err != nil {
@@ -112,7 +112,7 @@ func LoginHandler(c echo.Context) error {
 }
 
 // GetTokenClaims 验证token并返回信息
-func GetTokenClaims(c echo.Context, token string) (bool, *modules.Claims, error) {
+func GetTokenClaims(c *echo.Context, token string) (bool, *modules.Claims, error) {
 	claims := &modules.Claims{}
 	claimsMap, err := modules.Cache.Get(token)
 	if err != nil && err != modules.ErrKeyNotFound {
@@ -152,7 +152,7 @@ func GetTokenClaims(c echo.Context, token string) (bool, *modules.Claims, error)
 }
 
 // VerifyHandler 供nginx auth_request调用的验证接口
-func VerifyHandler(c echo.Context) error {
+func VerifyHandler(c *echo.Context) error {
 	redirectURL := c.Request().Header.Get("X-Original-URI")
 	tokenString := modules.Jwt.ExtractToken(c)
 	// 检查白名单

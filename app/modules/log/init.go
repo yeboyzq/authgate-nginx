@@ -13,14 +13,15 @@ See the Mulan PSL v2 for more details.
 package log
 
 import (
+	"errors"
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/yeboyzq/authgate-nginx/app/modules/config"
-	"github.com/yeboyzq/authgate-nginx/app/utils"
 
 	"github.com/labstack/echo/v5"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -104,7 +105,7 @@ func Init(e *echo.Echo) echo.MiddlewareFunc {
 
 	// 设置为默认 logger
 	slog.SetDefault(Logger)
-	e.Logger = &EchoLoggerAdapter{Logger: Logger}
+	e.Logger = Logger
 	e.HTTPErrorHandler = CustomErrorHandler
 	Logger.Info("日志中间件初始化完成.")
 
@@ -114,33 +115,62 @@ func Init(e *echo.Echo) echo.MiddlewareFunc {
 // LogMiddleware 自定义中间件，使用 slog 记录请求日志
 func LogMiddleware(logger *slog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			start := time.Now()
-
 			// 处理请求
 			err := next(c)
 			if err != nil {
-				c.Error(err)
+				c.Echo().HTTPErrorHandler(c, err)
 			}
-
-			// 记录日志
+			// 获取参数
 			latency := time.Since(start)
 			request := c.Request()
 			response := c.Response()
-			requestID := utils.GetRequestID(c)
-
+			requestID := getRequestID(c)
+			resp, err := getResponse(response)
+			if err != nil {
+				c.Logger().Error(err.Error())
+			}
+			// 记录日志
 			logger.Info("http_request",
-				"request_id", requestID,
-				"method", request.Method,
-				"uri", request.URL.Path,
-				"status", response.Status,
-				"latency", latency.String(),
-				"host", request.Host,
-				"remote_ip", c.RealIP(),
-				"user_agent", request.UserAgent(),
+				slog.String("request_id", requestID),
+				slog.String("method", request.Method),
+				slog.String("uri", request.URL.Path),
+				slog.Int("status", resp.Status),
+				slog.String("latency", latency.String()),
+				slog.String("host", request.Host),
+				slog.String("bytes_in", request.Header.Get(echo.HeaderContentLength)),
+				slog.Int64("bytes_out", resp.Size),
+				slog.String("remote_ip", c.RealIP()),
+				slog.String("user_agent", request.UserAgent()),
 			)
 
 			return nil
 		}
 	}
+}
+
+// getResponse 提取 echo.Response，如果未实现 unwrap 接口则包装构造
+func getResponse(resw http.ResponseWriter) (*echo.Response, error) {
+	var resp *echo.Response
+	var err error
+	if r, err := echo.UnwrapResponse(resw); err != nil {
+		err = errors.New("上下文中的ResponseWriter未实现unwrapper接口: " + err.Error())
+		resp = new(echo.Response)
+		resp.ResponseWriter = resw
+		resp.Status = -1
+		resp.Size = -1
+	} else {
+		resp = r
+	}
+	return resp, err
+}
+
+// getRequestID 获取请求ID
+func getRequestID(c *echo.Context) string {
+	requestID := c.Request().Header.Get(echo.HeaderXRequestID)
+	if requestID == "" {
+		requestID = c.Response().Header().Get(echo.HeaderXRequestID)
+	}
+	return requestID
 }

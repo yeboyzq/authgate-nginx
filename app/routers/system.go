@@ -65,7 +65,7 @@ type SysStatus struct {
 }
 
 // GetSystemStatus 更新获取系统运行状态
-func GetSystemStatus(c echo.Context) (sysStatus SysStatus) {
+func GetSystemStatus(c *echo.Context) (sysStatus SysStatus) {
 	localLocation := time.Now().Location()
 	AppStartTime := utils.AppStartTime.In(localLocation)
 	sysStatus.StartTime = AppStartTime.Format(time.RFC3339)
@@ -107,7 +107,7 @@ func GetSystemStatus(c echo.Context) (sysStatus SysStatus) {
 	return sysStatus
 }
 
-func GetSysStatus(c echo.Context) error {
+func GetSysStatus(c *echo.Context) error {
 	rspData := GetSystemStatus(c)
 	return c.JSON(http.StatusOK, rspData)
 }
