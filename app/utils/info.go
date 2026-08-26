@@ -13,49 +13,55 @@ See the Mulan PSL v2 for more details.
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
 var (
-	DefaultBuildTime time.Time = timeFormat("2000-01-01")
-	// 应用启动时间
-	AppStartTime time.Time
+	AppStartTime time.Time                         // 应用启动时间
+	version      string    = "dev"                 // 应用版本号("v0.0.1")
+	build_info   string    = ""                    // 应用编译信息
+	build_time   string    = "2001-01-01T00:00:00" // 应用编译时间(编译不传值时故意写错赋值为系统时间, 实际"2001-01-01T00:00:00+08:00")
 )
 
 // AppVersionInfo 定义版本信息
 type AppVersionInfo struct {
-	AppVersion      string
-	DatabaseVersion int32
-	BuildTime       time.Time
-	BuiltBy         string
+	AppVersion string
+	BuildInfo  string
+	BuildTime  time.Time
+	Compiler   string
 }
 
 var VersionInfo = &AppVersionInfo{
-	AppVersion:      "1.1.0",
-	DatabaseVersion: 0,
-	BuildTime:       timeFormat("2026-03-04"),
-	BuiltBy:         runtime.Version(),
+	AppVersion: version,
+	BuildInfo:  build_info,
+	BuildTime:  timeFormat(build_time),
+	Compiler:   runtime.Version(),
 }
 
-// AppFileName 获取可执行文件名
+// PrintAppVersionInfo 打印应用版本信息
+func PrintAppVersionInfo() {
+	fmt.Printf("Version: %s, Build Info: %s, Build Time: %s, Compiler By: %s\n", VersionInfo.AppVersion, VersionInfo.BuildInfo, VersionInfo.BuildTime, VersionInfo.Compiler)
+}
+
+// AppFileName 获取可执行文件名(不含扩展名)
 func AppFileName() string {
-	// 获取编译后的文件路径
 	executablePath, err := os.Executable()
 	if err != nil {
-		return "无法获取可执行文件名"
+		return "unknown"
 	}
-	// 从路径中提取文件名
 	fileName := filepath.Base(executablePath)
-	return fileName
+	ext := filepath.Ext(fileName)
+	return strings.TrimSuffix(fileName, ext)
 }
 
 // timeFormat 格式化时间字符串
 func timeFormat(str string) time.Time {
-	layout := "2006-01-02 Z0700 MST"
-	parsedTime, err := time.Parse(layout, str+" +0800 CST")
+	parsedTime, err := time.Parse(time.RFC3339, str)
 	if err != nil {
 		return time.Now().Local()
 	}

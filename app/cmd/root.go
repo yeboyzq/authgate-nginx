@@ -13,7 +13,6 @@ See the Mulan PSL v2 for more details.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/yeboyzq/authgate-nginx/app/utils"
@@ -34,7 +33,7 @@ var rootCmd = &cobra.Command{
 // rootFlag 根标志处理
 func rootFlag() {
 	if versionFlag {
-		fmt.Printf("Version: %s\nBuildTime: %s\n", utils.VersionInfo.AppVersion, utils.VersionInfo.BuildTime)
+		utils.PrintAppVersionInfo()
 		os.Exit(0)
 	}
 }

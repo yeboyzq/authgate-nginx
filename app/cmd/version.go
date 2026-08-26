@@ -13,8 +13,6 @@ See the Mulan PSL v2 for more details.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/yeboyzq/authgate-nginx/app/utils"
 
 	"github.com/spf13/cobra"
@@ -27,6 +25,6 @@ var versionCmd = &cobra.Command{
 	Short: "查看应用版本信息",
 	Long:  "查看应用版本信息",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version: %s\nBuilt By: %s\nBuild Time: %s\n", utils.VersionInfo.AppVersion, utils.VersionInfo.BuiltBy, utils.VersionInfo.BuildTime)
+		utils.PrintAppVersionInfo()
 	},
 }

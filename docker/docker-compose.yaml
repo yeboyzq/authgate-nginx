@@ -1,0 +1,48 @@
+# Copyright (c) 2026 authgate-nginx
+# authgate-nginx is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#         http://license.coscl.org.cn/MulanPSL2
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+
+
+#version: "2.0"
+services:
+  authgate-nginx:
+    image: authgate-nginx:v1.0.0
+    container_name: authgate-nginx
+    # 自动启动配置
+    restart: always
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 2048M
+    # 目录挂载卷(custom 含配置与 sqlite3 数据库; logs 为运行日志)
+    volumes:
+    - type: bind
+      source: /data/data/authgate-nginx/custom
+      target: /data/apps/custom
+      read_only: false
+      bind:
+        create_host_path: true
+    - type: bind
+      source: /data/logs/authgate-nginx
+      target: /data/logs
+      read_only: false
+      bind:
+        create_host_path: true
+    # 端口映射(8000=主服务, 48000=API文档服务, 需 apidoc.enable=true)
+    ports:
+    - "8000:8000"
+    - "48000:48000"
+    # 环境变量映射
+    environment:
+      # 时区设置
+      TZ: "Asia/Shanghai"
+
+# 配置结束

@@ -21,6 +21,7 @@ import (
 	"github.com/yeboyzq/authgate-nginx/app/modules/config"
 	"github.com/yeboyzq/authgate-nginx/app/modules/log"
 	"github.com/yeboyzq/authgate-nginx/app/utils"
+	"github.com/yeboyzq/authgate-nginx/app/utils/id"
 )
 
 var Jwt *JwtAuth
@@ -60,7 +61,7 @@ func (s *JwtAuth) CreateToken(username string) (string, *Claims, error) {
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        utils.NewDbUUID(),
+			ID:        id.NewDbUUID(),
 		},
 	}
 
