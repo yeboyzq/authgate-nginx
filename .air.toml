@@ -3,19 +3,19 @@
 # .(当前目录)或绝对路径, 注意这些目录都在根目录下面.
 root = "."
 # 临时目录
-tmp_dir = "tmp"
+tmp_dir = "temp"
 
 [build]
 # 只是普通的shell命令, 可以使用make
-cmd = "go build -v -o ./tmp/main.exe ./app"
+cmd = "go build -v -o ./temp/main.exe ./app"
 # cmd配置命令输出的二进制文件的位置
-bin = "tmp/main.exe"
+bin = "temp/main.exe"
 # 自定义二进制文件, 可以在运行应用程序时设置环境变量
-#full_bin = "APP_ENV=dev APP_USER=air ./tmp/main"
+#full_bin = "APP_ENV=dev APP_USER=air ./temp/main"
 # 监听的文件扩展后缀列表
 include_ext = ["go", "tpl", "tmpl", "html", "json", "yaml"]
 # 忽略这些文件扩展名或目录
-exclude_dir = ["vendor", "tmp", "log", "conf.d"]
+exclude_dir = ["vendor", "temp", "log", "custom"]
 # 如果指定, 则只监听包含这些文件目录
 include_dir = []
 # 监听文件列表.

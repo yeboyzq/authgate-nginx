@@ -13,7 +13,9 @@ See the Mulan PSL v2 for more details.
 package config
 
 import (
-	"log/slog"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -35,36 +37,41 @@ func Init() {
 // readConfig 读取配置
 func readConfig() *viper.Viper {
 	Cfg = viper.New()
+
+	// 启用环境变量读取，环境变量优先于配置文件
+	Cfg.SetEnvPrefix("app")
+	Cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	Cfg.AutomaticEnv()
+
+	// 配置文件优先级：
+	// 1. 命令行参数 CfgFile
+	// 2. 环境变量 APP_CONF_FILE
+	// 3. 默认配置文件 ./custom/conf/config.yaml
+	var configPath string
 	if CfgFile != "" {
-		// 从命令行加载配置文件
-		Cfg.SetConfigFile(CfgFile)
+		configPath = CfgFile
+	} else if envCfgFile := os.Getenv("APP_CONF_FILE"); envCfgFile != "" {
+		configPath = envCfgFile
 	} else {
-		// 从环境变量中读取
-		Cfg.SetEnvPrefix("app")
-		Cfg.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		Cfg.AutomaticEnv()
-		// 定义文件名
-		Cfg.SetConfigName("config.yaml")
-		// 定义文件类型
-		Cfg.SetConfigType("yaml")
-		// 定义查找路径
-		// Cfg.AddConfigPath(os.Getenv("APP_CONF_PATH"))
-		Cfg.AddConfigPath("./conf.d")
-		Cfg.AddConfigPath(".")
+		exePath, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		exeDir := filepath.Dir(exePath)    // ./bin
+		projectDir := filepath.Dir(exeDir) // ./
+		configPath = filepath.Join(projectDir, "custom", "conf", "config.yaml")
 	}
-	// 查找并读取配置文件
-	err := Cfg.ReadInConfig()
-	// 读取文件错误处理
-	if err != nil {
+
+	Cfg.SetConfigFile(configPath)
+	if err := Cfg.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			slog.Debug("配置初始化提示: 配置文件没有找到, 将以默认配置启动.")
+			fmt.Printf("WARN: 配置文件未找到: %v, 继续使用环境变量或默认值\n", configPath)
 		} else {
-			slog.Error("配置初始化失败: " + err.Error())
+			fmt.Printf("ERROR: 配置初始化失败: %v\n", err)
 		}
 	} else {
-		configFile := Cfg.ConfigFileUsed()
-		slog.Info("配置初始化完成.")
-		slog.Info("当前配置文件: " + configFile)
+		fmt.Printf("INFO: 配置初始化完成.\n")
+		fmt.Printf("当前配置文件: %v\n", Cfg.ConfigFileUsed())
 	}
 	return Cfg
 }
@@ -72,7 +79,7 @@ func readConfig() *viper.Viper {
 // dynamicConfig 动态加载配置
 func dynamicConfig() {
 	Cfg.OnConfigChange(func(e fsnotify.Event) {
-		slog.Info("配置文件发生变更: " + e.Name)
+		fmt.Printf("INFO: 配置文件发生变更: %v\n", e.Name)
 	})
 	Cfg.WatchConfig()
 }

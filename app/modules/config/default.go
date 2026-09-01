@@ -41,12 +41,13 @@ func defaultConfig(config *viper.Viper) {
 	config.SetDefault("base.ldap.userBaseDn", "ou=users,dc=example,dc=com")
 	config.SetDefault("base.ldap.filter", "(uid=%s)")
 	// log
-	config.SetDefault("base.log.path", "./logs")
-	config.SetDefault("base.log.maxsize", 10)
-	config.SetDefault("base.log.maxage", 7)
-	config.SetDefault("base.log.maxbackups", 30)
-	config.SetDefault("base.log.compress", true)
-	config.SetDefault("base.log.level", "info")
+	config.SetDefault("base.log.path", "")       // 日志保存路径
+	config.SetDefault("base.log.maxsize", 10)    // 单个日志文件最大大小(MB)
+	config.SetDefault("base.log.maxage", 7)      // 保留旧日志文件的最大天数
+	config.SetDefault("base.log.maxbackups", 30) // 保留旧日志文件最大数量
+	config.SetDefault("base.log.compress", true) // 是否压缩旧日志文件
+	config.SetDefault("base.log.level", "info")  // 日志等级
+	config.SetDefault("base.log.access", true)   // 是否输出访问日志
 
 	// advanced
 	config.SetDefault("advanced.whitelist", "")

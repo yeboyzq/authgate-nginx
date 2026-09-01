@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2025 authgate-nginx
+Copyright (c) 2026 authgate-nginx
 authgate-nginx is licensed under Mulan PSL v2.
 You can use this software according to the terms and conditions of the Mulan PSL v2.
 You may obtain a copy of Mulan PSL v2 at:
@@ -10,9 +10,13 @@ MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 See the Mulan PSL v2 for more details.
 */
 
-package utils
+package id
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+
+	"github.com/google/uuid"
+)
 
 // 常用uuid变量
 const (
@@ -24,7 +28,7 @@ const (
 )
 
 // NewDbUUID 生成数据库uuid
-func NewDbUUID() (id string) {
+func NewDbUUID() string {
 	NewUuid, err := uuid.NewV7()
 	if err != nil {
 		panic("生成数据库uuid失败: " + err.Error())
@@ -33,7 +37,7 @@ func NewDbUUID() (id string) {
 }
 
 // NewRequestID 生成请求uuid
-func NewRequestID() (id string) {
+func NewRequestID() string {
 	NewUuid, err := uuid.NewV7()
 	if err != nil {
 		panic("生成请求uuid失败: " + err.Error())
@@ -41,13 +45,33 @@ func NewRequestID() (id string) {
 	return NewUuid.String()
 }
 
-// IsValidID 判断ID是否有效
-func IsValidID(s string) bool {
+// IsUUID 判断UUID是否有效
+func IsUUID(s string) bool {
 	_, err := uuid.Parse(s)
 	return err == nil
 }
 
-// ParseID 验证并返回UUID
-func ParseID(s string) (uuid.UUID, error) {
+func IsUUIDv7(s string) bool {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		return false
+	}
+	return u.Version() == 7
+}
+
+// ParseUUID 验证并返回UUID
+func ParseUUID(s string) (uuid.UUID, error) {
 	return uuid.Parse(s)
+}
+
+// ParseUUIDv7 解析字符串并校验是否为 UUID 版本 7。
+func ParseUUIDv7(s string) (uuid.UUID, error) {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	if ver := u.Version(); ver != 7 {
+		return uuid.Nil, fmt.Errorf("无效的UUID版本: 预期为7, 实际为%d", ver)
+	}
+	return u, nil
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2025 authgate-nginx
+Copyright (c) 2026 authgate-nginx
 authgate-nginx is licensed under Mulan PSL v2.
 You can use this software according to the terms and conditions of the Mulan PSL v2.
 You may obtain a copy of Mulan PSL v2 at:
@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/yeboyzq/authgate-nginx/app/modules/config"
+	"github.com/yeboyzq/authgate-nginx/app/utils"
 
 	"github.com/labstack/echo/v5"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -31,35 +32,40 @@ var Logger *slog.Logger
 
 // LogConfig 日志配置
 type LogConfig struct {
-	Debug      bool   // 调试模式
-	Level      string // 日志等级
-	FilePath   string // 文件存放路径
-	MaxSize    int    // 单个文件最大大小(MB)
-	MaxBackups int    // 保留的旧文件最大数量
-	MaxAge     int    // 保留旧文件的最大天数
-	Compress   bool   // 是否压缩旧文件
+	debug      bool   // 调试模式
+	level      string // 日志等级
+	filePath   string // 文件存放路径
+	maxSize    int    // 单个文件最大大小(MB)
+	maxBackups int    // 保留旧文件最大数量
+	maxAge     int    // 保留旧文件最大天数
+	compress   bool   // 是否压缩旧文件
+	access     bool   // 是否输出访问日志
 }
 
 // Init 初始化日志系统
 func Init(e *echo.Echo) echo.MiddlewareFunc {
 	// 加载配置
 	Conf := &LogConfig{
-		Debug:      config.Cfg.GetBool("base.debug"),
-		Level:      config.Cfg.GetString("base.log.level"),
-		FilePath:   config.Cfg.GetString("base.log.path"),
-		MaxSize:    config.Cfg.GetInt("base.log.maxsize"),
-		MaxBackups: config.Cfg.GetInt("base.log.maxbackups"),
-		MaxAge:     config.Cfg.GetInt("base.log.maxage"),
-		Compress:   config.Cfg.GetBool("base.log.compress"),
+		debug:      config.Cfg.GetBool("base.debug"),
+		level:      config.Cfg.GetString("base.log.level"),
+		filePath:   config.Cfg.GetString("base.log.path"),
+		maxSize:    config.Cfg.GetInt("base.log.maxsize"),
+		maxBackups: config.Cfg.GetInt("base.log.maxbackups"),
+		maxAge:     config.Cfg.GetInt("base.log.maxage"),
+		compress:   config.Cfg.GetBool("base.log.compress"),
+		access:     config.Cfg.GetBool("base.log.access"),
+	}
+	if Conf.filePath == "" {
+		panic("日志组件初始化失败: 日志存储路径为空, 请配置base.log.path设置项.")
 	}
 	// 设置日志级别
 	var level slog.Level
 	var addSource bool
-	if Conf.Debug {
+	if Conf.debug {
 		level = slog.LevelDebug
 		addSource = false
 	} else {
-		switch Conf.Level {
+		switch Conf.level {
 		case "debug":
 			level = slog.LevelDebug
 			addSource = false
@@ -75,18 +81,27 @@ func Init(e *echo.Echo) echo.MiddlewareFunc {
 		}
 	}
 
-	// 设置日志轮转
+	// 设置业务日志轮转(app.log)
 	lumberjackLogger := &lumberjack.Logger{
-		Filename:   filepath.Join(Conf.FilePath, "authgate-nginx.log"),
-		MaxSize:    Conf.MaxSize,
-		MaxBackups: Conf.MaxBackups,
-		MaxAge:     Conf.MaxAge,
-		Compress:   Conf.Compress,
+		Filename:   filepath.Join(Conf.filePath, utils.AppFileName()+".log"),
+		MaxSize:    Conf.maxSize,
+		MaxBackups: Conf.maxBackups,
+		MaxAge:     Conf.maxAge,
+		Compress:   Conf.compress,
 	}
 
-	// 创建 slog handler
+	// 设置访问日志轮转(access.log)
+	accessLumberjackLogger := &lumberjack.Logger{
+		Filename:   filepath.Join(Conf.filePath, "access.log"),
+		MaxSize:    Conf.maxSize,
+		MaxBackups: Conf.maxBackups,
+		MaxAge:     Conf.maxAge,
+		Compress:   Conf.compress,
+	}
+
+	// 创建业务日志 slog handler
 	var handler slog.Handler
-	if Conf.Debug {
+	if Conf.debug {
 		multiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
 		handler = slog.NewTextHandler(multiWriter, &slog.HandlerOptions{
 			AddSource: addSource,
@@ -100,19 +115,42 @@ func Init(e *echo.Echo) echo.MiddlewareFunc {
 		})
 	}
 
-	// 创建 logger
-	Logger = slog.New(handler)
+	// 创建访问日志 slog handler(与业务日志保持一致的格式；debug时输出到Stdout+access.log)
+	var accessHandler slog.Handler
+	if Conf.debug {
+		accessMultiWriter := io.MultiWriter(os.Stdout, accessLumberjackLogger)
+		accessHandler = slog.NewTextHandler(accessMultiWriter, &slog.HandlerOptions{
+			AddSource: addSource,
+			Level:     level,
+		})
+	} else {
+		accessMultiWriter := io.MultiWriter(accessLumberjackLogger)
+		accessHandler = slog.NewJSONHandler(accessMultiWriter, &slog.HandlerOptions{
+			AddSource: addSource,
+			Level:     level,
+		})
+	}
 
-	// 设置为默认 logger
+	// 创建业务logger
+	Logger = slog.New(handler)
+	// 设置为默认logger
 	slog.SetDefault(Logger)
 	e.Logger = Logger
-	e.HTTPErrorHandler = CustomErrorHandler
 	Logger.Info("日志中间件初始化完成.")
 
-	return LogMiddleware(Logger)
+	// 访问日志开关
+	if !Conf.access {
+		return func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c *echo.Context) error {
+				return next(c)
+			}
+		}
+	}
+	accessLogger := slog.New(accessHandler)
+	return LogMiddleware(accessLogger)
 }
 
-// LogMiddleware 自定义中间件，使用 slog 记录请求日志
+// LogMiddleware 自定义中间件, 使用slog记录请求日志
 func LogMiddleware(logger *slog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
@@ -150,12 +188,12 @@ func LogMiddleware(logger *slog.Logger) echo.MiddlewareFunc {
 	}
 }
 
-// getResponse 提取 echo.Response，如果未实现 unwrap 接口则包装构造
+// getResponse 提取 echo.Response, 如果未实现 unwrap 接口则包装构造
 func getResponse(resw http.ResponseWriter) (*echo.Response, error) {
 	var resp *echo.Response
 	var err error
-	if r, err := echo.UnwrapResponse(resw); err != nil {
-		err = errors.New("上下文中的ResponseWriter未实现unwrapper接口: " + err.Error())
+	if r, unwrapErr := echo.UnwrapResponse(resw); unwrapErr != nil {
+		err = errors.New("上下文中的ResponseWriter未实现unwrapper接口: " + unwrapErr.Error())
 		resp = new(echo.Response)
 		resp.ResponseWriter = resw
 		resp.Status = -1

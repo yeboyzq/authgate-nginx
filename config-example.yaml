@@ -45,18 +45,20 @@ base:
     # 设置用户过滤
     filter: (uid=%s)
   log:
-    # 设置日志保存路径
+    # 日志保存路径
     path: ./logs
-    # 设置日志保存文件大小(M)
-    maxsize:
-    # 设置日志保留天数
-    maxage:
-    # 设置日志保留文件个数
-    maxbackups:
-    # 设置日志压缩
-    compress: 
-    # 设置日志等级
-    level: "info"
+    # 单个日志文件最大大小(MB)
+    maxsize: 10
+    # 保留旧日志文件的最大天数
+    maxage: 7
+    # 保留旧日志文件的最大数量
+    maxbackups: 30
+    # 是否压缩旧日志文件
+    compress: true
+    # 日志级别: debug/info/warn/error
+    level: info
+    # 是否输出访问日志
+    access: true
 
 # 高级设置
 advanced:
